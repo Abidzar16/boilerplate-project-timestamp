@@ -1,7 +1,3 @@
-// server.js
-// where your node app starts
-
-// init project
 var express = require('express');
 var app = express();
 
@@ -13,20 +9,39 @@ app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 20
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 
-// http://expressjs.com/en/starter/basic-routing.html
 app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
-
 
 // your first API endpoint... 
 app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
-
-
-// listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+app.get("/api/timestamp/", (req, res) => {
+  res.json({ unix: Date.now(), utc: Date() });
 });
+
+app.get("/api/timestamp/:tim", (req, res) =>{
+  var cur = new Date(req.params.tim);
+  if (/\d{5,}/.test(req.params.tim)) 
+    cur = new Date(parseInt(req.params.tim));
+
+  if(Date.parse(cur)){
+    res.json({
+      unix: cur.valueOf(),
+      utc: cur.toUTCString()
+    });
+  }
+  else{
+    res.json({
+      error: 'Invalid date',
+    });
+  }
+});
+
+// listen for requests
+var listener = app.listen(8080, function () {
+  console.log('App is listening on port ' + listener.address().port);
+});
+
